@@ -1,30 +1,75 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
 }
-
-group = 'com.alator21'
-version = '1.0-SNAPSHOT'
-
+group = 'io.github.alator21'
+version = '1.0.2'
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 publishing {
     publications {
-        myLib(MavenPublication) {
+        mavenJava(MavenPublication) {
+            groupId = 'io.github.alator21'
+            artifactId = 'passwordless-java'
+            version = '1.0.2'
             from components.java
+
+            pom {
+                name = 'Passwordless Java SDK'
+                description = 'Passwordless SDK in Java'
+                url = 'https://github.com/alator21/passwordless-java'
+                inceptionYear = '2023'
+
+                licenses {
+                    license {
+                        name = 'Apache-2.0'
+                        url = 'https://opensource.org/licenses/Apache-2.0'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'alator21'
+                        name = 'Rafael Triantafillidis'
+                        email = 'botazz133@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git:github.com/alator21/passwordless-java.git'
+                    developerConnection = 'scm:git:ssh://github.com/alator21/passwordless-java.git'
+                    url = 'https://github.com/alator21/passwordless-java'
+                }
+            }
         }
     }
+
     repositories {
         maven {
-            name = "MyRepo" //  optional target repository name
-            url = "http://my.org.server/repo/url"
+            name = "OSSRH"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                username = "$username"
-                password = "$password"
+                username = project.properties["nexusUsername"]
+                password = project.properties["nexusPassword"]
             }
         }
     }
 }
-repositories {
-    mavenCentral()
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+
+javadoc {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
 }
 
 dependencies {
@@ -34,4 +79,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
